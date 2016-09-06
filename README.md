@@ -1,2 +1,2 @@
-# coursera-parprog-scala
-Scala parallel programming
+# Scala parallel programming
+https://www.coursera.org/learn/parprog1
