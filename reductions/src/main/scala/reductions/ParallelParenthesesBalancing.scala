@@ -18,6 +18,19 @@ object ParallelParenthesesBalancingRunner {
   ) withWarmer(new Warmer.Default)
 
   def main(args: Array[String]): Unit = {
+    var cr = "(()))(".toArray
+    println(ParallelParenthesesBalancing.balance(cr) + " " + ParallelParenthesesBalancing.parBalance(cr, 2))
+     cr = "(())()".toArray
+    println(ParallelParenthesesBalancing.balance(cr) + " " + ParallelParenthesesBalancing.parBalance(cr, 2))
+    cr = "()()()".toArray
+    println(ParallelParenthesesBalancing.balance(cr) + " " + ParallelParenthesesBalancing.parBalance(cr, 2))
+     cr = "((()))".toArray
+    println(ParallelParenthesesBalancing.balance(cr) + " " + ParallelParenthesesBalancing.parBalance(cr, 2))
+    cr = ")(()()".toArray
+    println(ParallelParenthesesBalancing.balance(cr) + " " + ParallelParenthesesBalancing.parBalance(cr, 2))
+    cr = ")))(((".toArray
+    println(ParallelParenthesesBalancing.balance(cr) + " " + ParallelParenthesesBalancing.parBalance(cr, 2))
+
     val length = 100000000
     val chars = new Array[Char](length)
     val threshold = 10000
@@ -58,46 +71,35 @@ object ParallelParenthesesBalancing {
    */
   def parBalance(chars: Array[Char], threshold: Int): Boolean = {
 
-    //def traverse(idx: Int, until: Int, arg1: Int, arg2: Int): (Int,Int) = {
-      //var close = arg2
-      //var open = arg1
+    def traverse(idx: Int, until: Int): (Int,Int) = {
+      var open = 0
+      var min = 0
 
-      //var i = idx
-      //while (i < until) {
-        //if (chars(i) == '(')
-          //open += 1
-        //else if (chars(i) == ')' && open > 0) {
-          //open -= 1
-        //}
-        //i += 1
-      //}
+      var i = idx
+      while (i < until) {
+        if (chars(i) == '(')
+          open += 1
+        else if (chars(i) == ')') {
+          open -= 1
+          min = math.min(min, open)
+        }
+        i += 1
+      }
+      (open, min)
+    }
 
-      //var i = until - 1
-      //while (i >= idx) {
-        //if (chars(i) == ')')
-          //close += 1
-        //else if (chars(i) == '(' && close > 0) {
-          //close -= 1
-        //}
-        //i -= 1
-      //}
+    def reduce(from: Int, until: Int): (Int,Int) = {
+      if (until - from <= threshold)
+        traverse(from, until)
+      else {
+        val mid = from + (until - from) / 2
+        val (a, b) = parallel(reduce(from, mid), reduce(mid, until))
 
-      //(open, close)
-    //}
+        (a._1 + b._1, math.min(a._2, a._1 + b._2))
+      }
+    }
 
-    //def reduce(from: Int, until: Int, arg1: Int, arg2: Int): (Int,Int) = {
-      //if (until - from <= threshold)
-        //traverse(from, until, arg1, arg2)
-      //else {
-        //val mid = from + (until - from) / 2
-        //val (a, b) = parallel(reduce(from, mid, arg1, 0), reduce(mid, until, 0, arg2))
-
-        //(a._1 + b._1, a._2 + b._2)
-      //}
-    //}
-
-    //reduce(0, chars.length, 0, 0) == (0, 0)
-    false
+    reduce(0, chars.length) == (0, 0)
   }
 
   // For those who want more:
